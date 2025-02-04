@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Message Scraper",
+  "version": "1.0",
+  "description": "Scrape LinkedIn unread messages and store them.",
+  "permissions": ["scripting", "activeTab", "storage", "tabs"],
+  "host_permissions": ["https://www.linkedin.com/*", "http://127.0.0.1:8000/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content.js", "content2.js", "styles.css"],
+      "matches": ["https://www.linkedin.com/*"]
+    }
+  ],
+  "action": {
+  }
+}

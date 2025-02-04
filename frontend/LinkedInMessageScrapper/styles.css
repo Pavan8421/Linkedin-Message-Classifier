@@ -1,0 +1,55 @@
+.referral {
+    background-color: rgb(53, 255, 252) !important;
+  }
+  
+.opportunity {
+    background-color: rgb(153, 255, 116);
+  }
+
+.meeting_request {
+    background-color: rgb(244, 251, 116);
+  }
+
+.thanks {
+    background-color: rgb(251, 116, 251);
+  }
+  
+.general {
+    background-color: rgb(138, 138, 138) !important;
+  }
+
+.other {
+    background-color: rgb(65, 65, 65);
+  }
+
+.error {
+    background-color: rgb(255, 51, 51);
+  }
+
+.networking {
+    background-color: rgb(132, 51, 255);
+  }
+
+.meeting_request {
+    background-color: rgb(167, 234, 255);
+  }
+
+.feedback {
+    background-color: rgb(145, 145, 145);
+  }
+
+.acknowledgment {
+    background-color: rgb(145, 145, 145);
+  }
+
+.marketing {
+    background-color: rgb(255, 59, 59);
+  }
+
+.event {
+    background-color: rgb(255, 255, 59);
+  }
+
+.collaboration {
+    background-color: rgb(110, 255, 78);
+  }
