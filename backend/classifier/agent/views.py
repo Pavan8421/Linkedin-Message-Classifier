@@ -22,7 +22,7 @@ def classify(request):
         categories = [
             "referral", "thanks", "networking", "general", "sponsorship", 
             "opporutiny", "other", "meeting_request", "marketing", 
-            "event", "collaboration", "feedback"
+            "event", "collaboration", "feedback", "greeting"
         ]
         
         # Call the classify_message function

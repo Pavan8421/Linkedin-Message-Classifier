@@ -75,18 +75,18 @@ async function processChats(mappedData) {
       return;
     }
 
-    const reqChats = Array.from(chatList).slice(0, Object.keys(mappedData).length);
+    const reqChats = chatList;
     
     reqChats.forEach(chat => {
       const username = chat.querySelector(
         ".msg-conversation-listitem__participant-names span.truncate"
       )?.innerText.trim();
 
-      if (username) {
+      if (mappedData[username]) {
         // Remove any existing category classes
         const categories = ['referral', 'opportunity', 'meeting_request', 'thanks', 
                           'general', 'other', 'error', 'networking', 'feedback', 
-                          'acknowledgment', 'marketing', 'event', 'collaboration'];
+                          'acknowledgment', 'marketing', 'event', 'collaboration', 'greeting'];
         chat.classList.remove(...categories);
         
         // Add new category

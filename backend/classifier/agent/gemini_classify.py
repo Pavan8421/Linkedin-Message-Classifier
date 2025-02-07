@@ -93,7 +93,7 @@ def main():
                   Thank you,
                   Pavan Kumar."""
               ]
-    categories = ["referral", "thanks", "networking", "general", "sponsorship", "opporutiny", "other", "meeting_request", "marketing", "event", "collaboration", "feedback"]    
+    categories = ["referral", "thanks", "networking", "general", "sponsorship", "opporutiny", "other", "meeting_request", "marketing", "event", "collaboration", "feedback", "greeting"]    
     # Perform classification
     for message in messages:
       predicted_category = classify_message(message, categories)
