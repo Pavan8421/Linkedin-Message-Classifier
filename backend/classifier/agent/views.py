@@ -16,7 +16,7 @@ def classify(request):
                 "predicted_category": None,
                 "message": "No message provided in the request."
             }, status=400)
-        
+            
         print(messages)
         # Define categories
         categories = [

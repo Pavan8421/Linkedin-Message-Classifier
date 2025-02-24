@@ -67,7 +67,7 @@ async function handleChatData(chatData, senderTab) {
         await wait(10000);
 
         try {
-          // Get the active tab
+          // Get the active tab 
           const tabs = await chrome.tabs.query({active: true, currentWindow: true});
           const activeTab = tabs[0];
           console.log("Active tab:", activeTab);
@@ -105,7 +105,8 @@ async function processChatData(chatData) {
 
   for (const chat of chatData) {
     const { username, notificationMessages } = chat;
-
+    console.log(username);
+    console.log(notificationMessages);
     if (username && notificationMessages && notificationMessages.length > 0) {
       try {
         const messagesString = notificationMessages.join(",");
@@ -129,6 +130,7 @@ async function processChatData(chatData) {
         mappedData[username] = "general";
       }
     } else {
+      console.log("not called api");
       mappedData[username] = "general";
     }
   }
