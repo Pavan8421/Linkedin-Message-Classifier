@@ -1,139 +1,123 @@
-console.log("Background script running!");
+// background.js (Coordinator)
+// This file coordinates extraction and classification processes.
+// It uses ES modules to import functions from extractionManager.js and classificationManager.js.
+console.log("Background script running.");
+import {
+  startExtraction,
+  cancelExtraction,
+  showNoUnreadPopup,
+} from "./extractionManager.js";
 
-// Helper function to delay execution
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import {
+  startClassification,
+  cancelClassification,
+  clearClassifications,
+} from "./classificationManager.js";
 
-// Listen for extension icon clicks
+// Flags to track if extraction or classification is currently running
+let extractionRunning = false;
+let classificationRunning = false;
+
+// Called when user clicks the extension icon in the toolbar
 chrome.action.onClicked.addListener((tab) => {
-  console.log("Extension clicked on tab:", tab);
-
+  console.log("Extension icon clicked.");
   if (tab.url && tab.url.includes("linkedin.com/messaging")) {
-    const updatedUrl = tab.url.includes("?filter=unread")
-      ? tab.url
-      : tab.url + "?filter=unread";
-
-    chrome.tabs.update(tab.id, { url: updatedUrl }, () => {
-      console.log("Updated URL:", updatedUrl);
-
-      const listener = async (tabId, changeInfo, updatedTab) => {
-        if (tabId === tab.id && changeInfo.status === "complete" && updatedTab.url === updatedUrl) {
-          console.log("Tab finished loading. Waiting before injecting content script...");
-          await wait(10000);
-
-          try {
-            await chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              files: ["content.js"],
-            });
-            console.log("Content script injected successfully");
-          } catch (error) {
-            console.error("Error injecting content script:", error);
-          }
-
-          chrome.tabs.onUpdated.removeListener(listener);
-        }
-      };
-
-      chrome.tabs.onUpdated.addListener(listener);
-    });
+    extractionRunning = true;
+    startExtraction(tab);
   } else {
-    console.log("This extension only works on LinkedIn messaging.");
+    console.log("❌ This extension only works on LinkedIn messaging.");
   }
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "storeChats") {
-    const chatData = message.data;
-    console.log("Chat Data received from content.js:", chatData);
+  switch (message.type) {
+    // (1) After content.js finishes extraction, it sends "storeChats"
+    case "storeChats": {
+      console.log("Chat data received:", message.data);
 
-    // Process the chatData and handle the page update
-    handleChatData(chatData, sender.tab);
+      // Confirm we're on a LinkedIn messaging tab
+      if (sender.tab && sender.tab.url.includes("linkedin.com/messaging")) {
+        // Extraction has finished
+        extractionRunning = false;
+
+        // If no chats, remove "?filter=unread" and show "no unread" popup
+        if (!message.data || message.data.length === 0) {
+          const updatedUrl = sender.tab.url.split("?filter=unread")[0];
+          chrome.tabs.update(sender.tab.id, { url: updatedUrl }, () => {
+            console.log("No unread messages found.");
+            setTimeout(() => {
+              showNoUnreadPopup(sender.tab.id);
+            }, 3000);
+          });
+        }
+        // Otherwise, start classification
+        else {
+          classificationRunning = true;
+          startClassification(message.data, sender.tab);
+        }
+      } else {
+        console.log("Extension works only on LinkedIn messaging tab.");
+      }
+      break;
+    }
+
+    // (2) "Start Classification" button from popup
+    case "startClassification": {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const activeTab = tabs[0];
+        if (activeTab && activeTab.url.includes("linkedin.com/messaging")) {
+          extractionRunning = true;
+          startExtraction(activeTab);
+        } else {
+          console.log("❌ This extension only works on LinkedIn messaging.");
+        }
+      });
+      break;
+    }
+
+    // (3) "Cancel" button from popup
+    case "cancelClassification": {
+      console.log("Cancel message received.");
+
+      // If neither extraction nor classification is running, ignore
+      if (!extractionRunning && !classificationRunning) {
+        console.log("Cancel action ignored because nothing is running.");
+        sendResponse({ status: "nothing to cancel" });
+        return true;
+      }
+
+      // Otherwise, proceed to cancel
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const activeTab = tabs[0];
+        if (activeTab && activeTab.url.includes("linkedin.com/messaging")) {
+          cancelExtraction(activeTab);
+          cancelClassification(activeTab);
+          extractionRunning = false;
+          classificationRunning = false;
+        } else {
+          console.log("Cancel can only be used in LinkedIn messaging tab.");
+        }
+      });
+      sendResponse({ status: "canceled" });
+      return true;
+    }
+
+    // (4) "Clear Messages" button from popup
+    case "clearClassifiedMessages": {
+      console.log("Clear classified messages requested.");
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const activeTab = tabs[0];
+        if (activeTab && activeTab.url.includes("linkedin.com/messaging")) {
+          clearClassifications(activeTab);
+        } else {
+          console.log("Clear can only be used in LinkedIn messaging tab.");
+        }
+      });
+      sendResponse({ status: "cleared" });
+      return true;
+    }
+
+    default:
+      break;
   }
 });
-
-async function handleChatData(chatData, senderTab) {
-  try {
-    // Process chat data
-    const mappedData = await processChatData(chatData);
-    console.log("Mapped Data:", mappedData);
-
-    // Update URL and inject second content script
-    const updatedUrl = senderTab.url.split("?filter=unread")[0];
-    
-    // Update tab URL and wait for completion
-    await new Promise((resolve) => {
-      chrome.tabs.update(senderTab.id, { url: updatedUrl }, async () => {
-        // Wait for page load
-        await wait(10000);
-
-        try {
-          // Get the active tab 
-          const tabs = await chrome.tabs.query({active: true, currentWindow: true});
-          const activeTab = tabs[0];
-          console.log("Active tab:", activeTab);
-
-          // Inject content2.js
-          await chrome.scripting.executeScript({
-            target: { tabId: activeTab.id },
-            files: ["content2.js"]
-          });
-          console.log("Content2.js injected successfully");
-
-          // Wait for content script to initialize
-          await wait(2000);
-
-          // Send mapped data to content2.js
-          await chrome.tabs.sendMessage(activeTab.id, {
-            type: "mapData",
-            data: mappedData
-          });
-          console.log("Mapped data sent successfully");
-        } catch (error) {
-          console.error("Error in script injection or message sending:", error);
-        }
-
-        resolve();
-      });
-    });
-  } catch (error) {
-    console.error("Error in handleChatData:", error);
-  }
-}
-
-async function processChatData(chatData) {
-  const mappedData = {};
-
-  for (const chat of chatData) {
-    const { username, notificationMessages } = chat;
-    console.log(username);
-    console.log(notificationMessages);
-    if (username && notificationMessages && notificationMessages.length > 0) {
-      try {
-        const messagesString = notificationMessages.join(",");
-        const response = await fetch("http://127.0.0.1:8000/api/classify/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages: messagesString }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          mappedData[username] = data.predicted_category;
-        } else {
-          console.error("API Error:", response.statusText);
-          mappedData[username] = "general";
-        }
-      } catch (error) {
-        console.error("Error processing chat:", username, error);
-        mappedData[username] = "general";
-      }
-    } else {
-      console.log("not called api");
-      mappedData[username] = "general";
-    }
-  }
-
-  return mappedData;
-}

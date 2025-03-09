@@ -1,60 +1,100 @@
 .referral {
-    background-color: rgb(53, 255, 252) !important;
-  }
-  
+  background-color: rgb(53, 255, 252) !important;
+}
+
 .opportunity {
-    background-color: rgb(153, 255, 116);
-  }
+  background-color: rgb(153, 255, 116);
+}
 
 .meeting_request {
-    background-color: rgb(244, 251, 116);
-  }
+  background-color: rgb(244, 251, 116);
+}
 
 .thanks {
-    background-color: rgb(251, 116, 251);
-  }
-  
+  background-color: rgb(251, 116, 251);
+}
+
 .general {
-    background-color: rgb(138, 138, 138) !important;
-  }
+  background-color: rgb(138, 138, 138) !important;
+}
 
 .other {
-    background-color: rgb(65, 65, 65);
-  }
+  background-color: rgb(65, 65, 65);
+}
 
 .error {
-    background-color: rgb(255, 51, 51);
-  }
+  background-color: rgb(255, 51, 51);
+}
 
 .networking {
-    background-color: rgb(132, 51, 255);
-  }
+  background-color: rgb(132, 51, 255);
+}
 
 .meeting_request {
-    background-color: rgb(167, 234, 255);
-  }
+  background-color: rgb(167, 234, 255);
+}
 
 .feedback {
-    background-color: rgb(145, 145, 145);
-  }
+  background-color: rgb(145, 145, 145);
+}
 
 .acknowledgment {
-    background-color: rgb(145, 145, 145);
-  }
+  background-color: rgb(145, 145, 145);
+}
 
 .marketing {
-    background-color: rgb(255, 59, 59);
-  }
+  background-color: rgb(255, 59, 59);
+}
 
 .event {
-    background-color: rgb(255, 255, 59);
-  }
+  background-color: rgb(255, 255, 59);
+}
 
 .collaboration {
-    background-color: rgb(110, 255, 78);
-  }
-
+  background-color: rgb(110, 255, 78);
+}
 
 .greeting {
   background-color: orange;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+/* Popup Window Styling */
+.popup-body {
+  width: 120px; /* Very small popup */
+  height: 80px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f8f8;
+}
+
+.popup-button {
+  margin: 3px;
+  padding: 3px 5px;
+  font-size: 10px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+}
+
+.popup-button:hover {
+  background-color: #0056b3;
 }
